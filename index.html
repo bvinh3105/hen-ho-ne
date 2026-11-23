@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Hẹn Hò Nè</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pangolin&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: phong thư trên tường sáng → mở ra thành 2 tờ giấy kẻ dòng khổ A4 (40 dòng) lật được.
+   Trang 1: lời nhắn + chân dung vẽ tay. Trang 2: 3 tờ note vẽ tay, chữ nằm đúng trên dòng kẻ. */
+@property --rule{ syntax:'<length>'; inherits:true; initial-value:28px }
+
+:root{
+  --wall:#E6E3DE;
+  --wall-ink:#6E675C;
+  --paper:#FCF9F1;
+  --line:#E5DDCC;
+  --ink:#1E1B17;
+  --ink-soft:#6F6656;
+  --bright:#FFFDF5;
+  --n1:#FFC845;
+  --n2:#FFE35A;
+  --n3:#FFB23E;
+  --env:#F1E6CF;
+  --env-in:#D8C6A2;
+  --env-flap:#EADBBE;
+  --tape:#C9A57E;
+  --tape-line:rgba(120,85,45,.18);
+  --hi:rgba(255,255,255,.34);
+  --shade:rgba(55,40,15,.24);
+  --bind:rgba(70,52,25,.10);
+  --f-hand:"Patrick Hand","Segoe Print","Comic Sans MS",cursive;
+  --f-mark:"Pangolin","Patrick Hand","Comic Sans MS",cursive;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top, 0px);
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  -webkit-text-size-adjust:100%;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --wall:#221F1B; --wall-ink:#A89F90; --paper:#EFE9DB; --line:#D8CEB9;
+    --ink:#1E1B17; --ink-soft:#655C4D; --bright:#FBF8EE;
+    --n1:#F4BC3C; --n2:#F2D650; --n3:#F0A836;
+    --env:#E4D7BC; --env-in:#C2B08D; --env-flap:#DACBAD;
+    --tape:#B8936A; --tape-line:rgba(90,60,30,.22); --hi:rgba(255,255,255,.22);
+    --shade:rgba(0,0,0,.5); --bind:rgba(60,45,20,.14);
+    color-scheme:dark;
+  }
+}
+
+html{ background:var(--wall) }
+body{
+  margin:0;
+  background:var(--wall); color:var(--ink);
+  font-family:var(--f-hand);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:24px 48px;
+}
+img{ max-width:100% }
+.desk{ overflow-x:clip; padding-block:4px 16px }
+[hidden]{ display:none !important }
+
+/* ================= PHONG THƯ ================= */
+.env-scene{ display:grid; justify-items:center; text-align:center }
+.env-title{ margin:0; color:var(--wall-ink); font-size:1.25rem; line-height:1.4; transition:opacity .3s ease }
+.env-wrap{ container-type:inline-size; width:min(100%, 560px); margin-top:clamp(130px, 28vw, 230px) }
+.envelope{
+  position:relative; display:block; width:100%; aspect-ratio:1.45;
+  border:0; padding:0; margin:0; background:none; cursor:pointer; color:var(--ink);
+  font-family:var(--f-hand); text-align:left;
+  perspective:1000px;
+  filter:drop-shadow(0 14px 16px var(--shade));
+  transform:rotate(-1.5deg);
+  animation:envIdle 3.4s ease-in-out infinite;
+  -webkit-tap-highlight-color:transparent;
+}
+@media (max-width:480px){ .envelope{ aspect-ratio:1.22 } }
+@keyframes envIdle{ 0%,100%{ transform:rotate(-1.5deg) translateY(0) } 50%{ transform:rotate(-1.5deg) translateY(-5px) } }
+.envelope:focus-visible{ outline:2px dashed var(--ink); outline-offset:10px }
+.is-opening .envelope{ animation:none; transform:rotate(0deg); transition:transform .4s ease }
+
+.env-in, .env-letter, .env-pocket, .env-edge, .env-label, .env-flap, .env-seal{ position:absolute; display:block }
+.env-in{ inset:0; z-index:0; background:var(--env-in); border:2.5px solid var(--ink); border-radius:8px }
+.env-letter{
+  left:7%; right:7%; top:6%; height:86%; z-index:2;
+  background-color:var(--paper);
+  background-image:repeating-linear-gradient(to bottom, transparent 0 13px, var(--line) 13px 14px);
+  border-radius:3px; box-shadow:0 1px 2px var(--shade);
+  transition:transform .75s cubic-bezier(.3,.7,.2,1) .85s;
+}
+.env-letter-txt{ position:absolute; left:8%; top:7%; font-size:clamp(15px, 4.2cqw, 23px) }
+.is-opening .env-letter{ transform:translateY(-66%) }
+.env-pocket{ inset:0; z-index:3; background:var(--env); border-radius:8px; clip-path:polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%) }
+.env-pocket svg, .env-flap svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.env-pocket path, .env-flap path{ fill:none; stroke:var(--ink); stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke }
+.env-edge{ inset:0; z-index:4; border:2.5px solid var(--ink); border-top:0; border-radius:0 0 8px 8px; pointer-events:none }
+.env-label{
+  left:13%; right:13%; bottom:8%; height:36%; z-index:5;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:0 5%;
+  background:var(--paper); border:1.5px solid var(--ink); border-radius:4px;
+  transform:rotate(-1.2deg);
+  font-size:clamp(13px, 3.7cqw, 21px); line-height:1.45;
+}
+.env-label .row{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.env-label .lab{ display:inline-block; min-width:4.7em; font-family:var(--f-mark); font-size:.78em; letter-spacing:.06em; color:var(--ink-soft) }
+.env-flap{
+  left:0; right:0; top:0; height:58%; z-index:6;
+  transform-origin:50% 0; transform:rotateX(0deg);
+  transition:transform .65s ease-in-out .3s, z-index 0s linear .62s;
+}
+.env-flap::before{ content:""; position:absolute; inset:0; background:var(--env-flap); clip-path:polygon(0 0, 100% 0, 50% 100%) }
+.is-opening .env-flap{ transform:rotateX(180deg); z-index:1 }
+.env-seal{
+  left:50%; top:58%; width:14%; aspect-ratio:1 / 1; z-index:7;
+  transform:translate(-50%, -50%) rotate(-8deg);
+  transition:transform .5s ease, opacity .4s ease .1s;
+}
+.env-seal svg{ display:block; width:100%; height:100% }
+.seal-heart{ fill:var(--n3); stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round }
+.is-opening .env-seal{ transform:translate(-20%, -170%) rotate(-38deg) scale(.75); opacity:0 }
+.env-hint{ margin:26px 0 0; color:var(--wall-ink); font-size:1.1rem; animation:nudge 1.9s ease-in-out infinite; transition:opacity .3s ease }
+.is-opening .env-title, .is-opening .env-hint{ opacity:0 }
+
+/* ================= SỔ: 2 TỜ A4 ================= */
+/* 794px = bề rộng tờ A4 ở 96dpi */
+.notebook{ container-type:inline-size; position:relative; max-width:794px; margin:0 auto }
+.book-scene.arrive .notebook{ animation:arrive .8s cubic-bezier(.2,.8,.2,1) both }
+@keyframes arrive{ from{ opacity:0; transform:translateY(70px) scale(.9) } to{ opacity:1; transform:none } }
+
+.book{ display:grid; perspective:2600px }
+.sheet{ grid-area:1 / 1; align-self:start; transform-origin:0 50%; backface-visibility:hidden }
+.sheet-1{ z-index:2; transition:transform .95s cubic-bezier(.45,.05,.3,1), opacity .3s ease, visibility 0s }
+.sheet-2{ z-index:1; visibility:hidden; transition:visibility 0s linear .95s }
+.book.on-2 .sheet-1{
+  transform:rotateY(-118deg); opacity:0; visibility:hidden; pointer-events:none;
+  transition:transform .95s cubic-bezier(.45,.05,.3,1), opacity .35s ease .6s, visibility 0s linear .95s;
+}
+.book.on-2 .sheet-2{ visibility:visible; transition:none }
+
+.page{
+  --rule:clamp(25px, 3.536cqw, 28px);       /* A4: 297/210 ÷ 40 dòng = 3.536% bề rộng */
+  position:relative; box-sizing:border-box; width:100%;
+  min-height:calc(var(--rule) * 40);
+  display:flex; flex-direction:column;
+  font-size:calc(var(--rule) * .66); line-height:var(--rule);
+  background-color:var(--paper);
+  background-image:repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule) - 1px), var(--line) calc(var(--rule) - 1px) var(--rule));
+  /* dòng kẻ nằm ở 73% mỗi hàng chữ = ngay chân chữ */
+  background-position:0 calc(1px - var(--rule) * .27);
+  padding:calc(var(--rule) * 2) clamp(16px, 6cqw, 52px) var(--rule) clamp(20px, 7.5cqw, 64px);
+  border-radius:3px;
+  box-shadow:0 1px 2px var(--shade), 0 26px 44px -26px var(--shade);
+}
+.page::before{
+  content:""; position:absolute; inset:0 auto 0 0; width:26px;
+  background:linear-gradient(to right, var(--bind), transparent);
+  border-radius:3px 0 0 3px; pointer-events:none;
+}
+.tape{
+  position:absolute; top:calc(var(--rule) * .55); right:-8px; width:clamp(96px, 22cqw, 176px); height:calc(var(--rule) * 1.4);
+  background:
+    repeating-linear-gradient(90deg, var(--tape-line) 0 1px, transparent 1px 7px),
+    var(--tape);
+  clip-path:polygon(0 0, 100% 0, 89% 50%, 100% 100%, 0 100%);
+  transform:rotate(-1.2deg); opacity:.93; pointer-events:none;
+}
+.pill{
+  display:inline-block; box-sizing:border-box; height:var(--rule); white-space:nowrap;
+  padding:4px calc(var(--rule) * .55);
+  font:400 calc(var(--rule) * .5)/calc(var(--rule) - 8px) var(--f-mark);
+  text-transform:uppercase; letter-spacing:.13em;
+  background:var(--ink); color:var(--paper);
+  border:0; margin:0;
+  border-radius:42% 48% 44% 50% / 62% 54% 60% 52%;
+  transform:rotate(-1.6deg);
+}
+.pager{ display:flex; justify-content:space-between; align-items:center; height:var(--rule); margin-top:auto }
+.pg{ font-family:var(--f-mark); font-size:.8em; letter-spacing:.12em; color:var(--ink-soft) }
+.turn{ cursor:pointer; transition:transform .2s ease }
+.turn:hover{ transform:rotate(-1.6deg) translateX(3px) }
+.turn:focus-visible{ outline:2px dashed var(--ink); outline-offset:4px }
+.book-foot{ display:flex; justify-content:center; padding-top:22px }
+.refold{ background:none; border:0; padding:6px 12px; border-radius:8px; color:var(--wall-ink); font:400 1.05rem var(--f-hand); cursor:pointer }
+.refold:hover{ text-decoration:underline wavy 1px; text-underline-offset:5px }
+.refold:focus-visible{ outline:2px dashed var(--wall-ink) }
+
+/* ---------- trang 1: lời nhắn ---------- */
+.greet{ margin:0 0 var(--rule); padding-right:clamp(84px, 22cqw, 176px); font:400 calc(var(--rule) * .9)/var(--rule) var(--f-hand) }
+.p1-body{ display:grid; grid-template-columns:minmax(0, 1fr) calc(var(--rule) * 9); column-gap:clamp(14px, 4cqw, 34px); align-items:start }
+.p1-text p{ margin:0 }
+.p1-text p + p{ margin-top:var(--rule) }
+.portrait{ margin:0; display:grid; justify-items:center }
+.pnote{
+  position:relative; display:block; width:100%; height:calc(var(--rule) * 11);
+  background:var(--note); border-radius:12px 15px 17px 11px;
+  transform:rotate(2.5deg);
+  box-shadow:0 1px 0 var(--shade), 0 12px 14px -10px var(--shade);
+}
+.pnote::before{ content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(160deg, var(--hi), transparent 48%) }
+.pnote svg{ position:relative; display:block; width:100%; height:100% }
+.ptape{
+  position:absolute; top:-11px; left:50%; width:44%; height:24px; z-index:1;
+  transform:translateX(-50%) rotate(-4deg);
+  background:repeating-linear-gradient(90deg, var(--tape-line) 0 1px, transparent 1px 7px), var(--tape);
+  opacity:.9;
+}
+.portrait figcaption{ line-height:var(--rule); color:var(--ink-soft) }
+.signoff{ margin:var(--rule) 0 0; text-align:right; font-size:calc(var(--rule) * .85); line-height:var(--rule) }
+@container (max-width:560px){
+  .p1-body{ grid-template-columns:minmax(0, 1fr) calc(var(--rule) * 6) }
+  .pnote{ height:calc(var(--rule) * 7) }
+}
+@container (max-width:460px){
+  .p1-body{ grid-template-columns:minmax(0, 1fr); row-gap:var(--rule) }
+  .portrait{ order:-1 }
+  .pnote{ width:calc(var(--rule) * 7); height:calc(var(--rule) * 8) }
+}
+
+/* ---------- trang 2: tiêu đề 3 dòng ---------- */
+.head{ position:relative; padding-right:clamp(84px, 22cqw, 176px); margin-bottom:var(--rule) }
+.head::after{
+  content:""; position:absolute; left:0; right:0; height:1.5px;
+  bottom:calc(var(--rule) * .27 - 1.25px); background:var(--ink-soft);
+}
+.head h1{
+  margin:0; height:calc(var(--rule) * 2);
+  font:400 calc(var(--rule) * 1.25)/1 var(--f-hand); letter-spacing:.16em;
+  display:flex; align-items:flex-end; gap:.35em; white-space:nowrap;
+}
+.head h1 svg{ width:1.1em; height:.92em; flex:none; margin-bottom:.12em }
+.head .sub{ margin:0; color:var(--ink-soft); font-size:.92em; line-height:var(--rule) }
+
+/* ---------- từng chặng ---------- */
+.plan{ list-style:none; margin:0; padding:0; display:grid; gap:var(--rule) }
+.entry{
+  --note-w:calc(var(--rule) * 7);
+  display:grid; grid-template-columns:var(--note-w) minmax(0, 1fr);
+  column-gap:clamp(14px, 4cqw, 32px); align-items:start;
+}
+.entry.flip{ grid-template-columns:minmax(0, 1fr) var(--note-w) }
+.entry.flip .note-wrap{ order:2 }
+@container (max-width:560px){ .entry{ --note-w:calc(var(--rule) * 5) } }
+
+.note-wrap{ position:relative; perspective:900px }
+
+/* Tờ note dính ở mép trên. Góc dưới bóc lên được: JS cắt phần giấy bị gập (clip-path)
+   và lật nó qua nếp gấp (.flap-wrap) — kéo được quá nửa tờ. */
+.note{
+  --fa:color-mix(in srgb, var(--note), var(--ink) 16%);
+  --fb:color-mix(in srgb, var(--note), var(--bright) 58%);
+  --fc:color-mix(in srgb, var(--note), var(--bright) 30%);
+  position:relative; z-index:1; display:block; width:100%; aspect-ratio:1 / 1;
+  border:0; padding:0; margin:0; background:none; cursor:pointer; color:var(--ink);
+  transform:rotate(var(--r)); transform-origin:50% 0;
+  filter:drop-shadow(0 1px 0 var(--shade)) drop-shadow(0 6px 5px var(--shade));
+  touch-action:manipulation; user-select:none; -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.paper{ position:absolute; inset:0; display:block; background:var(--note); border-radius:12px 15px 17px 11px }
+.paper::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(160deg, var(--hi), transparent 48%);
+}
+.paper svg{ position:relative; display:block; width:100%; height:100%; pointer-events:none }
+.flap-wrap{
+  position:absolute; left:0; top:0; width:100%; height:100%; display:none;
+  transform-origin:0 0; pointer-events:none;
+  filter:drop-shadow(0 0 5px var(--shade));
+}
+.flap{ position:absolute; inset:0; display:block; border-radius:12px 15px 17px 11px }
+.grab{ position:absolute; right:-5%; bottom:-5%; width:50%; height:50%; touch-action:none; cursor:grab }
+.flip .grab{ right:auto; left:-5% }
+.note:focus-visible{ outline:2px dashed var(--ink); outline-offset:7px }
+
+/* tim nhỏ bật ra lúc tờ note được dán xuống */
+.pop{
+  position:absolute; left:50%; top:34%; width:18px; height:18px; z-index:3;
+  color:var(--ink); pointer-events:none;
+  animation:pop .95s ease-out both;
+}
+.pop svg{ display:block; width:100%; height:100% }
+@keyframes pop{
+  0%  { transform:translate(-50%, 0) scale(.3) rotate(0); opacity:0 }
+  18% { opacity:1 }
+  100%{ transform:translate(calc(-50% + var(--px)), var(--py)) scale(1) rotate(var(--pr)); opacity:0 }
+}
+
+/* lời nhắc */
+.hint{
+  position:absolute; top:calc(var(--rule) * -1.2); right:-18px; z-index:2;
+  display:flex; align-items:flex-end; gap:2px;
+  font-size:.86em; line-height:1; color:var(--ink-soft); white-space:nowrap;
+  transform:rotate(7deg); pointer-events:none;
+  animation:nudge 1.9s ease-in-out infinite;
+  transition:opacity .3s ease;
+}
+.hint svg{ width:24px; height:24px; transform:translateY(12px) }
+.has-opened .hint{ opacity:0 }
+@keyframes nudge{ 0%,100%{ translate:0 0 } 50%{ translate:0 -4px } }
+
+/* ---------- cột chữ: mọi thứ cao đúng bội số của 1 dòng ---------- */
+.info{ min-width:0; display:flex; flex-direction:column; align-items:flex-start }
+.ttl{ margin:0; font:400 calc(var(--rule) * .82)/var(--rule) var(--f-hand) }
+.teaser{ margin:0; color:var(--ink-soft); font-size:.9em; line-height:var(--rule) }
+.is-open .teaser{ display:none }
+
+.details{
+  display:grid; grid-template-rows:0fr; width:100%;
+  transition:grid-template-rows .6s cubic-bezier(.3,.8,.3,1);
+}
+.is-open .details{ grid-template-rows:1fr }
+.details > .inner{ overflow:hidden; min-height:0 }
+.details p{ margin:0; line-height:var(--rule) }
+.details .plus{ display:flex; gap:8px; align-items:flex-start }
+.details .plus svg{ flex:none; width:calc(var(--rule) * .66); height:calc(var(--rule) * .66); margin-top:calc(var(--rule) * .14) }
+
+/* hiệu ứng "đang viết" từ trái sang phải */
+.details .w{ clip-path:inset(0 100% 0 0) }
+.is-open .details .w{
+  animation:write .9s ease-out forwards;
+  animation-delay:calc(.6s + var(--i, 0) * .2s);
+}
+@keyframes write{ to{ clip-path:inset(-14px -14px -14px -14px) } }
+
+/* lựa chọn quán: mỗi quán 1 dòng */
+.choices{ display:grid; width:100% }
+.choice{
+  position:relative; display:flex; align-items:flex-start; gap:8px; width:100%;
+  background:none; border:0; margin:0; padding:0 10px 0 2px;
+  font:inherit; line-height:var(--rule); color:inherit; text-align:left; cursor:pointer; border-radius:8px;
+  -webkit-tap-highlight-color:transparent;
+}
+.choice:focus-visible{ outline:2px dashed var(--ink); outline-offset:2px }
+.choice .box{ flex:none; width:calc(var(--rule) * .66); height:calc(var(--rule) * .66); margin-top:calc(var(--rule) * .1) }
+.c-txt{ display:block; min-width:0 }
+.c-sub{ font-size:.86em; line-height:1; color:var(--ink-soft) }
+.c-sub::before{ content:" · " }
+.choice:hover .c-name{ text-decoration:underline wavy var(--ink-soft) 1px; text-underline-offset:5px }
+.choice.is-other{ opacity:.5 }
+.choice .loop{ position:absolute; left:-2px; top:-4px; width:calc(100% + 4px); height:calc(100% + 8px); pointer-events:none; overflow:visible }
+.picked{ color:var(--ink-soft) }
+.picked b{ font-weight:400; color:var(--ink); background:linear-gradient(transparent 55%, var(--n2) 55%) }
+
+/* nét vẽ tay dùng chung trong SVG */
+.s { fill:none; stroke:var(--ink); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round }
+.sf{ fill:var(--bright); stroke:var(--ink); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round }
+.sb{ fill:none; stroke:var(--bright); stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.sn{ fill:none; stroke:var(--note); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round }
+.th{ stroke-width:1.7 }
+.fat{ stroke-width:5.5 }
+.k { fill:var(--ink) }
+.kb{ fill:var(--bright) }
+.kn{ fill:var(--note) }
+.yolk{ fill:var(--note); stroke:var(--ink); stroke-width:1.4 }
+.lbl{ font-family:var(--f-hand); font-size:15px; fill:var(--ink) }
+.num-t{ font-family:var(--f-mark); font-size:12px; fill:var(--note); text-anchor:middle; dominant-baseline:central }
+.mark, .tick, .loop path{
+  fill:none; stroke:var(--ink); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:1 2; stroke-dashoffset:1.05;
+  transition:stroke-dashoffset .8s ease;
+}
+.mark.is-on, .is-picked .tick, .is-picked .loop path{ stroke-dashoffset:0 }
+.tick{ stroke-width:2.6; transition-duration:.35s }
+.loop path{ stroke-width:2 }
+
+/* ---------- chốt lịch: 7 dòng ---------- */
+.recap{ position:relative; margin-top:var(--rule); display:grid; justify-items:start }
+.recap::before{
+  content:""; position:absolute; left:0; right:0; height:0;
+  top:calc(var(--rule) * -.27); border-top:1.5px dashed var(--ink-soft);
+}
+.recap ul{ list-style:none; margin:0; padding:0; width:100% }
+.recap li{ display:flex; flex-wrap:wrap; column-gap:10px; line-height:var(--rule) }
+.recap .t{ font-family:var(--f-mark); font-size:.9em; min-width:5.6em }
+.sum{ font-weight:400 }
+.sum.empty{ color:var(--ink-soft); text-decoration:underline dashed var(--ink-soft) 1.5px; text-underline-offset:4px }
+.sum.done{ background:linear-gradient(transparent 55%, var(--n2) 55%) }
+.send-row{ display:flex; flex-wrap:wrap; align-items:center; column-gap:12px; width:100%; min-height:var(--rule) }
+.send{
+  box-sizing:border-box; height:var(--rule); margin:0;
+  padding:0 calc(var(--rule) * .55);
+  border:1.5px solid var(--ink);
+  border-radius:42% 48% 44% 50% / 62% 54% 60% 52%;
+  background:var(--n3); color:var(--ink);
+  font:400 calc(var(--rule) * .62)/1 var(--f-hand); white-space:nowrap;
+  cursor:pointer; transform:rotate(-1deg); transition:transform .2s ease;
+}
+.send:not(:disabled):hover{ transform:rotate(-1deg) translateY(-2px) }
+.send:disabled{ background:transparent; color:var(--ink-soft); border-style:dashed; cursor:default }
+.send:focus-visible{ outline:2px dashed var(--ink); outline-offset:4px }
+.send-status{ font-size:.86em; line-height:var(--rule); color:var(--ink-soft) }
+.sign{ display:flex; align-items:flex-end; gap:12px; height:calc(var(--rule) * 2); justify-self:end }
+.sign svg{ width:calc(var(--rule) * 2.5); height:calc(var(--rule) * 2); flex:none }
+.sign p{ margin:0; font-size:calc(var(--rule) * .85); line-height:var(--rule); transform:rotate(-3deg); transform-origin:left bottom }
+
+/* ảnh chốt lịch (ngoài trang giấy) */
+.shot{ max-width:440px; margin:26px auto 0; text-align:center; color:var(--wall-ink) }
+.shot img{ display:block; width:100%; border-radius:6px; box-shadow:0 12px 26px -12px var(--shade) }
+.shot figcaption{ margin-top:10px; font-size:1rem }
+
+@media (prefers-reduced-motion: reduce){
+  .envelope, .env-hint, .hint{ animation:none }
+  .env-flap, .env-seal, .env-letter, .sheet-1, .book.on-2 .sheet-1{ transition:none }
+  .details{ transition:none }
+  .is-open .details .w{ animation:none; clip-path:none }
+  .mark, .tick, .loop path{ transition:none }
+  .pop{ display:none }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<main class="desk">
+
+  <!-- ================= PHONG THƯ ================= -->
+  <section class="scene env-scene" id="envScene">
+    <p class="env-title">có thư nè ♡</p>
+    <div class="env-wrap">
+      <button class="envelope" id="envelope" type="button"
+        aria-label="Phong thư. From: Vân Đình. To: Phobokimchi aka Tũn. Nội dung: Hẹn hò như phớt đết. Chạm để mở thư">
+        <span class="env-in"></span>
+        <span class="env-letter"><span class="env-letter-txt">Gửi Tũn ♡</span></span>
+        <span class="env-pocket">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 L50 54 L100 0 M0 100 L41 63 M100 100 L59 63"/></svg>
+        </span>
+        <span class="env-edge"></span>
+        <span class="env-label">
+          <span class="row"><span class="lab">From:</span> Vân Đình</span>
+          <span class="row"><span class="lab">To:</span> Phobokimchi aka Tũn</span>
+          <span class="row"><span class="lab">Nội dung:</span> Hẹn hò như phớt đết</span>
+        </span>
+        <span class="env-flap">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 L50 100 L100 0"/></svg>
+        </span>
+        <span class="env-seal">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path class="seal-heart" d="M20 34 C6 25 4 12 13 9 C17 8 19 10 20 13 C21 10 23 8 27 9 C36 12 34 25 20 34 Z"/>
+            <path class="sb" d="M11 16 q1 -4 5 -4"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+    <p class="env-hint">chạm vào phong thư để mở nha</p>
+  </section>
+
+  <!-- ================= THƯ: 2 TRANG ================= -->
+  <section class="scene book-scene" id="bookScene" hidden>
+    <article class="notebook">
+      <div class="book" id="book">
+
+        <!-- ---------- TRANG 1 ---------- -->
+        <section class="sheet sheet-1 page" id="sheet1" aria-label="Trang 1: lời nhắn">
+          <div class="p1-body">
+            <div class="p1-text">
+              <p>Há lô phở bò kim chi nhưng mà tớ đ thích gọi thế, cứ gọi là Tũn nhé. Nhân dịp không ngày gì cả, tớ lại muốn đưa cậu đi hẹn hò như lần đầu đi chơi nhưng mà chỉn chu hơn.</p>
+              <p>Lịch trình thì tớ có ghi sẵn ở trang sau ý, có cả mấy chỗ để bạn bé tự chọn nữa, nhớ lật trang để xem thử và chọn nha.</p>
+              <p>À, mê cậu nhiều lắm, cám ơn vì đã đến</p>
+            </div>
+
+            <figure class="portrait" style="--note:var(--n1)">
+              <span class="pnote">
+                <span class="ptape" aria-hidden="true"></span>
+                <svg id="portraitSvg" viewBox="0 0 240 300" role="img" aria-label="Hình vẽ tay Tũn: tóc dài, kính gọng tròn, áo sọc">
+                  <defs>
+                    <clipPath id="torso"><path d="M36 300 Q38 236 86 212 Q120 222 154 212 Q202 236 204 300 Z"/></clipPath>
+                  </defs>
+                  <g filter="url(#rough)">
+                    <!-- tóc phía sau -->
+                    <path class="k" d="M72 98 Q56 140 54 200 Q52 246 44 268 Q60 280 78 274 L80 120 Z"/>
+                    <path class="k" d="M168 98 Q184 140 186 200 Q188 246 196 268 Q180 280 162 274 L160 120 Z"/>
+                    <!-- áo sọc -->
+                    <path class="sf" d="M36 300 Q38 236 86 212 Q120 222 154 212 Q202 236 204 300 Z"/>
+                    <g clip-path="url(#torso)">
+                      <path class="s" style="stroke-width:3.6" d="M30 234 Q120 244 210 234 M30 252 Q120 262 210 252 M30 270 Q120 280 210 270 M30 288 Q120 298 210 288"/>
+                    </g>
+                    <!-- cổ -->
+                    <path class="sf" d="M106 172 L106 214 Q120 224 134 214 L134 172 Z"/>
+                    <path class="s th" d="M98 213 Q120 232 142 213"/>
+                    <!-- mặt -->
+                    <path class="sf" d="M78 108 Q75 160 104 178 Q120 188 136 178 Q165 160 162 108 Q160 70 120 62 Q80 70 78 108 Z"/>
+                    <!-- tóc trước: 2 mành tóc + đỉnh đầu, rẽ ngôi giữa -->
+                    <path class="k" d="M118 52 Q86 54 75 90 Q67 120 71 160 Q73 200 65 240 Q61 262 71 274 L88 272 Q85 240 87 205 Q89 170 85 140 Q86 104 103 84 Q112 72 118 52 Z"/>
+                    <path class="k" d="M122 52 Q154 54 165 90 Q173 120 169 160 Q167 200 175 240 Q179 262 169 274 L152 272 Q155 240 153 205 Q151 170 155 140 Q154 104 137 84 Q128 72 122 52 Z"/>
+                    <path class="k" d="M73 96 Q74 40 120 35 Q166 40 167 96 Q156 70 126 64 L114 64 Q84 70 73 96 Z"/>
+                    <path class="sb th" d="M120 39 L120 62"/>
+                    <path class="sb th" d="M92 100 Q86 140 88 186 M150 100 Q156 140 154 186 M104 50 Q90 58 84 74"/>
+                    <path class="s th" d="M96 37 q-8 -8 -18 -2 M146 39 q8 -9 18 -4"/>
+                    <!-- lông mày, mắt -->
+                    <path class="s th" d="M90 107 Q99 103 108 106 M132 106 Q141 103 150 107"/>
+                    <ellipse class="k" cx="101" cy="130" rx="3.4" ry="4"/>
+                    <ellipse class="k" cx="139" cy="130" rx="3.4" ry="4"/>
+                    <circle class="kb" cx="102.3" cy="128.6" r="1.1"/>
+                    <circle class="kb" cx="140.3" cy="128.6" r="1.1"/>
+                    <path class="s th" d="M94 126 Q101 121.5 108 125.5 M132 125.5 Q139 121.5 146 126"/>
+                    <!-- kính gọng tròn -->
+                    <ellipse class="s" style="stroke-width:3" cx="100" cy="128" rx="19" ry="14.5" transform="rotate(-5 100 128)"/>
+                    <ellipse class="s" style="stroke-width:3" cx="140" cy="128" rx="19" ry="14.5" transform="rotate(5 140 128)"/>
+                    <path class="s" d="M118.5 126 Q120 122 121.5 126 M81.5 124 L74 120 M158.5 124 L166 120"/>
+                    <!-- mũi, môi, má, khuyên tai -->
+                    <path class="s th" d="M120 139 q-3.5 7 1.5 8.5"/>
+                    <path class="yolk" d="M112 160 Q116 156.5 120 158.5 Q124 156.5 128 160 Q120 166 112 160 Z"/>
+                    <path class="s th" d="M88 150 l4 -5 M93.5 151 l4 -5 M99 151.5 l4 -5 M137 151.5 l4 -5 M142.5 151 l4 -5 M148 150 l4 -5"/>
+                    <circle class="sb" cx="163" cy="153" r="4.2"/>
+                  </g>
+                </svg>
+              </span>
+              <figcaption>↑ Tũn nè ♡</figcaption>
+            </figure>
+          </div>
+
+          <p class="signoff">Luv,<br>Vinh,<br>24/11/2026.</p>
+
+          <footer class="pager">
+            <span class="pg">1 / 2</span>
+            <button class="pill turn" type="button" data-go="2">lật trang →</button>
+          </footer>
+        </section>
+
+        <!-- ---------- TRANG 2 ---------- -->
+        <section class="sheet sheet-2 page" id="sheet2" aria-label="Trang 2: lịch trình" inert aria-hidden="true">
+          <span class="tape" aria-hidden="true"></span>
+
+          <header class="head">
+            <h1>HẸN HÒ NÈ
+              <svg viewBox="0 0 48 40" aria-hidden="true">
+                <g filter="url(#rough)">
+                  <path class="s" d="M16 31 C4 23 6 10 16 16 C26 10 28 23 16 31 Z"/>
+                  <path class="k" d="M34 24 C27 19.5 28.5 12 34 15.5 C39.5 12 41 19.5 34 24 Z"/>
+                  <path class="s th" d="M40 6 l3 -4 M44 11 l4 -1"/>
+                </g>
+              </svg>
+            </h1>
+            <p class="sub">lịch trình buổi hẹn sắp tới · 3 chặng</p>
+          </header>
+
+          <ol class="plan">
+
+            <!-- ============ CHẶNG 1 ============ -->
+            <li class="entry" style="--note:var(--n1); --r:-2.5deg">
+              <div class="note-wrap">
+                <span class="hint" aria-hidden="true">kéo góc giấy thử nè
+                  <svg viewBox="0 0 30 30"><path class="s th" d="M26 4 C24 16 16 22 6 24 M6 24 l6 -6 M6 24 l8 3"/></svg>
+                </span>
+                <button class="note" type="button" aria-expanded="false" aria-controls="d1"
+                  aria-label="Tờ note 5h chiều: đón em bé, chụp photobooth. Chạm để xem chi tiết">
+                  <span class="paper"><svg viewBox="0 0 200 200" aria-hidden="true">
+                    <g filter="url(#rough)">
+                      <path class="s th" d="M104 12 Q106 19 112 21 Q106 23 104 30 Q102 23 96 21 Q102 19 104 12 Z"/>
+                      <!-- dải ảnh photobooth -->
+                      <g transform="rotate(-7 60 100)">
+                        <path class="sf" d="M30 26 Q60 23 90 26 L91 172 Q60 175 29 172 Z"/>
+                        <path class="s th" d="M37 34 H83 V72 H37 Z M37 79 H83 V117 H37 Z M37 124 H83 V162 H37 Z"/>
+                        <!-- khung 1: Tũn (tóc dài, kính) + mình -->
+                        <path class="k" d="M40.5 69 Q39 47 51 46 Q63 47 61.5 69 Z"/>
+                        <circle class="sf th" cx="51" cy="57" r="9"/>
+                        <path class="k" d="M42.5 55 Q43 46.5 51 46.5 Q59 46.5 59.5 55 Q55 50 51 50.5 Q47 50 42.5 55 Z"/>
+                        <circle class="sf th" cx="69" cy="57" r="9"/>
+                        <circle class="k" cx="48" cy="57" r="1.2"/><circle class="k" cx="54" cy="57" r="1.2"/>
+                        <ellipse class="s th" cx="47.8" cy="57" rx="3.1" ry="2.5"/><ellipse class="s th" cx="54.2" cy="57" rx="3.1" ry="2.5"/>
+                        <circle class="k" cx="66" cy="56" r="1.3"/><circle class="k" cx="72" cy="56" r="1.3"/>
+                        <path class="s th" d="M48.5 61.5 Q51 63.5 53.5 61.5 M66 60 Q69 63 72 60"/>
+                        <path class="k" d="M60 44.5 C56 42 57 38.5 60 40.5 C63 38.5 64 42 60 44.5 Z"/>
+                        <!-- khung 2 -->
+                        <path class="k" d="M60 109 C46 100 49 88 60 95 C71 88 74 100 60 109 Z"/>
+                        <path class="s th" d="M44 87 v6 M41 90 h6 M76 103 v6 M73 106 h6"/>
+                        <!-- khung 3: má kề má -->
+                        <path class="k" d="M42.5 157 Q41 135 53 134 Q65 135 63.5 157 Z"/>
+                        <circle class="sf th" cx="53" cy="145" r="9"/>
+                        <path class="k" d="M44.5 143 Q45 134.5 53 134.5 Q61 134.5 61.5 143 Q57 138 53 138.5 Q49 138 44.5 143 Z"/>
+                        <circle class="sf th" cx="67" cy="144" r="9"/>
+                        <path class="s th" d="M48.5 145.5 l1.8 -2.2 l1.8 2.2 M54.5 145.5 l1.8 -2.2 l1.8 2.2 M62.5 144 l1.8 -2.2 l1.8 2.2 M68.5 144 l1.8 -2.2 l1.8 2.2"/>
+                        <ellipse class="s th" cx="50.3" cy="144.6" rx="3.1" ry="2.5"/><ellipse class="s th" cx="56.3" cy="144.6" rx="3.1" ry="2.5"/>
+                        <circle class="s th" cx="53" cy="150.5" r="1.5"/>
+                        <path class="s th" d="M64 148.5 Q67 151.5 70 148.5"/>
+                      </g>
+                      <!-- máy ảnh -->
+                      <g transform="rotate(7 147 74)">
+                        <path class="k" d="M126 50 Q127 42 134 42 H150 Q156 42 157 50 Z"/>
+                        <path class="k" d="M112 55 Q112 49 118 49 H176 Q182 49 182 55 V94 Q182 100 176 100 H118 Q112 100 112 94 Z"/>
+                        <circle class="kn" cx="148" cy="75" r="17"/>
+                        <circle class="s" cx="148" cy="75" r="17"/>
+                        <circle class="s th" cx="148" cy="75" r="8.5"/>
+                        <circle class="kb" cx="143" cy="70" r="2.6"/>
+                        <rect class="kb" x="164" y="55" width="11" height="7" rx="2"/>
+                        <circle class="kb" cx="121" cy="57" r="2.2"/>
+                      </g>
+                      <path class="s th" d="M186 40 l8 -7 M190 51 l8 -1 M178 33 l3 -9"/>
+                      <!-- nhãn -->
+                      <circle class="k" cx="117" cy="125" r="8"/><text class="num-t" x="117" y="125.5">1</text>
+                      <text class="lbl" x="129" y="130">đón em bé</text>
+                      <circle class="k" cx="117" cy="151" r="8"/><text class="num-t" x="117" y="151.5">2</text>
+                      <text class="lbl" x="129" y="156">photobooth</text>
+                      <text class="lbl" x="120" y="182">cheese~</text>
+                      <path class="k" d="M178 182 C172 178 173.5 172.5 178 175.5 C182.5 172.5 184 178 178 182 Z"/>
+                      <path class="s th" d="M118 190 q10 -4 20 0 t20 0 t20 0"/>
+                    </g>
+                  </svg></span>
+                  <span class="flap-wrap" aria-hidden="true"><span class="flap"></span></span>
+                  <span class="grab" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <div class="info">
+                <span class="pill">5h chiều</span>
+                <h2 class="ttl">Đón em bé, đi chụp photobooth</h2>
+                <p class="teaser">← chạm hoặc kéo góc tờ note nha</p>
+                <div class="details" id="d1" inert>
+                  <div class="inner">
+                    <p class="w" style="--i:0">5h mình qua đón em bé. Hai đứa lượn lờ vài vòng phố cho thong thả, rồi ghé tiệm photobooth.</p>
+                    <p class="w plus" style="--i:1">
+                      <svg viewBox="0 0 20 20" aria-hidden="true"><circle class="k" cx="10" cy="10" r="9"/><path class="sb" d="M10 5.5 v9 M5.5 10 h9"/></svg>
+                      <span>Chụp thật nhiều kiểu, mỗi đứa giữ một dải ảnh làm kỉ niệm.</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <!-- ============ CHẶNG 2 ============ -->
+            <li class="entry flip" style="--note:var(--n2); --r:2.5deg">
+              <div class="note-wrap">
+                <button class="note" type="button" aria-expanded="false" aria-controls="d2"
+                  aria-label="Tờ note 6h rưỡi đến 7h: đi ăn tối, chọn Fungha Dimsum hoặc Ramen Haruki. Chạm để xem chi tiết">
+                  <span class="paper"><svg viewBox="0 0 200 200" aria-hidden="true">
+                    <g filter="url(#rough)">
+                      <!-- xửng dimsum -->
+                      <path class="s th" d="M48 18 q-5 6 0 12 q5 6 0 12 M68 10 q-5 6 0 12 q5 6 0 12 M88 18 q-5 6 0 12 q5 6 0 12"/>
+                      <path class="s" d="M26 66 Q70 40 114 66"/>
+                      <path class="sf" d="M32 67 Q34 49 48 49 Q61 49 63 67 Z"/>
+                      <path class="sf" d="M80 67 Q82 51 95 51 Q107 51 109 67 Z"/>
+                      <path class="sf" d="M54 68 Q56 44 71 44 Q86 44 88 68 Z"/>
+                      <path class="s th" d="M42 52 l2 6 M48 50 v6 M54 52 l-2 6 M65 47 l2 7 M71 45 v7 M77 47 l-2 7 M90 54 l2 6 M96 52 v6 M102 54 l-2 6"/>
+                      <path class="s" d="M26 66 Q70 92 114 66"/>
+                      <path class="s" d="M26 66 V94 M114 66 V94"/>
+                      <path class="s" d="M26 94 Q70 120 114 94"/>
+                      <path class="s th" d="M26 80 Q70 106 114 80"/>
+                      <path class="s th" d="M36 74 v8 M50 79 v8 M64 81 v8 M78 81 v8 M92 78 v8 M106 73 v8 M36 88 v8 M50 93 v8 M64 95 v8 M78 95 v8 M92 92 v8 M106 87 v8"/>
+                      <circle class="k" cx="130" cy="34" r="8"/><text class="num-t" x="130" y="34.5">1</text>
+                      <text class="lbl" x="142" y="39">Fungha</text>
+                      <text class="lbl" x="142" y="57">Dimsum</text>
+
+                      <text class="lbl" x="40" y="138">hay là ?</text>
+
+                      <!-- bát ramen -->
+                      <path class="s th" d="M138 84 q-5 6 0 12 q5 6 0 12 M160 80 q-5 6 0 12 q5 6 0 12"/>
+                      <path class="s" d="M108 128 Q150 108 192 128"/>
+                      <path class="k" d="M118 106 L136 102 L139 128 L120 130 Z"/>
+                      <path class="s th" d="M114 128 q4 -5 8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0"/>
+                      <circle class="sf th" cx="146" cy="121" r="9"/>
+                      <path class="s th" d="M146 121 q3 -1 2 -4 q-3 -3 -6 1 q-2 5 4 7 q6 1 7 -5"/>
+                      <ellipse class="sf th" cx="168" cy="120" rx="12" ry="8.5"/>
+                      <ellipse class="yolk" cx="168" cy="120.5" rx="5.5" ry="4"/>
+                      <path class="k" d="M108 128 Q110 170 150 172 Q190 170 192 128 Q150 148 108 128 Z"/>
+                      <path class="sb" d="M112 131 Q150 148 188 131"/>
+                      <path class="sn" d="M124 152 l6 -6 l6 6 l6 -6 l6 6 l6 -6 l6 6 l6 -6 l6 6"/>
+                      <path class="s" d="M132 171 L135 180 H165 L168 171"/>
+                      <path class="s" style="stroke-width:3" d="M197 95 L142 127 M199 103 L147 133"/>
+                      <circle class="k" cx="20" cy="158" r="8"/><text class="num-t" x="20" y="158.5">2</text>
+                      <text class="lbl" x="32" y="163">Ramen</text>
+                      <text class="lbl" x="32" y="181">Haruki</text>
+
+                      <!-- vòng khoanh khi em bé chọn -->
+                      <path class="mark" data-group="an" data-opt="fungha" pathLength="1" d="M196 40 C194 16 124 14 119 36 C114 62 174 70 194 54 C200 48 197 40 189 35"/>
+                      <path class="mark" data-group="an" data-opt="haruki" pathLength="1" d="M84 160 C83 140 12 138 7 158 C3 182 60 192 82 176 C88 170 86 162 78 156"/>
+                    </g>
+                  </svg></span>
+                  <span class="flap-wrap" aria-hidden="true"><span class="flap"></span></span>
+                  <span class="grab" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <div class="info">
+                <span class="pill">6h rưỡi – 7h</span>
+                <h2 class="ttl">Đi ăn tối</h2>
+                <p class="teaser">chạm hoặc kéo góc tờ note nha →</p>
+                <div class="details" id="d2" inert>
+                  <div class="inner">
+                    <p class="w" style="--i:0">Lượn mỏi chân thì đi ăn. Em bé chọn giúp một trong hai chỗ nha:</p>
+                    <div class="choices" role="group" aria-label="Chọn chỗ ăn tối">
+                      <button class="choice w" style="--i:1" type="button" data-group="an" data-opt="fungha" aria-pressed="false">
+                        <svg class="box" viewBox="0 0 24 24" aria-hidden="true"><path class="s th" d="M4 5 Q11 3 19 4 Q20 11 19 19 Q11 20 4 19 Q3 11 4 5 Z"/><path class="tick" pathLength="1" d="M6 12 L10 17 L23 1"/></svg>
+                        <span class="c-txt"><span class="c-name">Fungha Dimsum</span><span class="c-sub">dimsum, chia nhau từng xửng nhỏ</span></span>
+                        <svg class="loop" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M186 12 C150 -2 30 0 12 20 C-2 40 60 60 130 56 C186 52 202 30 172 8"/></svg>
+                      </button>
+                      <button class="choice w" style="--i:2" type="button" data-group="an" data-opt="haruki" aria-pressed="false">
+                        <svg class="box" viewBox="0 0 24 24" aria-hidden="true"><path class="s th" d="M4 5 Q11 3 19 4 Q20 11 19 19 Q11 20 4 19 Q3 11 4 5 Z"/><path class="tick" pathLength="1" d="M6 12 L10 17 L23 1"/></svg>
+                        <span class="c-txt"><span class="c-name">Ramen Haruki</span><span class="c-sub">ramen, mỗi đứa một bát nóng hổi</span></span>
+                        <svg class="loop" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M186 12 C150 -2 30 0 12 20 C-2 40 60 60 130 56 C186 52 202 30 172 8"/></svg>
+                      </button>
+                    </div>
+                    <p class="w picked" style="--i:3" data-picked="an" aria-live="polite">Chạm vào tên quán để chọn nha.</p>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <!-- ============ CHẶNG 3 ============ -->
+            <li class="entry" style="--note:var(--n3); --r:-1.8deg">
+              <div class="note-wrap">
+                <button class="note" type="button" aria-expanded="false" aria-controls="d3"
+                  aria-label="Tờ note 8h đến 8h rưỡi: cà phê hẹn hò, chọn Gain.Hanoi hoặc Caffeine Rush. Chạm để xem chi tiết">
+                  <span class="paper"><svg viewBox="0 0 200 200" aria-hidden="true">
+                    <g filter="url(#rough)">
+                      <circle class="k" cx="18" cy="30" r="8"/><text class="num-t" x="18" y="30.5">1</text>
+                      <text class="lbl" x="30" y="35">Gain.Hanoi</text>
+
+                      <!-- tách latte -->
+                      <path class="s th" d="M134 14 q-5 6 0 12 q5 6 0 12 M154 8 q-5 6 0 12 q5 6 0 12"/>
+                      <ellipse class="sf" cx="144" cy="104" rx="42" ry="10"/>
+                      <path class="sf" d="M112 62 Q114 98 144 100 Q174 98 176 62 Z"/>
+                      <path class="s" d="M175 70 Q191 68 189 82 Q187 94 172 90"/>
+                      <ellipse class="sf" cx="144" cy="62" rx="32" ry="9"/>
+                      <ellipse class="k" cx="144" cy="63" rx="26" ry="6"/>
+                      <path class="kb" d="M144 66.6 C139.2 63.4 140.4 59.4 144 61.8 C147.6 59.4 148.8 63.4 144 66.6 Z"/>
+                      <path class="s th" d="M144 88 C138.6 84.5 140 80 144 82.6 C148 80 149.4 84.5 144 88 Z"/>
+
+                      <!-- ly đá mang đi -->
+                      <path class="s fat" d="M56 102 L68 62"/>
+                      <path class="sf" d="M28 104 Q50 86 72 104 Z"/>
+                      <path class="sf" d="M20 112 Q20 104 28 104 H72 Q80 104 80 112 V118 H20 Z"/>
+                      <path class="sf" d="M24 118 L32 186 Q50 190 68 186 L76 118 Z"/>
+                      <path class="k" d="M27 146 Q50 152 73 146 L68 184 Q50 188 32 184 Z"/>
+                      <path class="sb" d="M36 156 l11 -3 l3 11 l-11 3 Z M52 162 l11 2 l-2 11 l-11 -2 Z"/>
+                      <path class="s th" d="M38 126 l11 -2 l2 11 l-11 2 Z"/>
+                      <path class="k" d="M62 138 C56.6 134.5 58 130 62 132.6 C66 130 67.4 134.5 62 138 Z"/>
+                      <path class="s th" d="M86 128 q3 4 0 7 M88 150 q3 4 0 7"/>
+
+                      <text class="lbl" x="104" y="137">hay là ?</text>
+                      <circle class="k" cx="110" cy="162" r="8"/><text class="num-t" x="110" y="162.5">2</text>
+                      <text class="lbl" x="122" y="167">Caffeine</text>
+                      <text class="lbl" x="122" y="185">Rush</text>
+
+                      <path class="mark" data-group="cafe" data-opt="gain" pathLength="1" d="M98 30 C96 10 12 8 7 30 C3 54 70 62 94 44 C100 38 97 30 89 25"/>
+                      <path class="mark" data-group="cafe" data-opt="rush" pathLength="1" d="M184 164 C182 142 108 140 103 162 C99 186 158 196 180 180 C186 174 184 166 176 160"/>
+                    </g>
+                  </svg></span>
+                  <span class="flap-wrap" aria-hidden="true"><span class="flap"></span></span>
+                  <span class="grab" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <div class="info">
+                <span class="pill">8h – 8h rưỡi</span>
+                <h2 class="ttl">Cà phê hẹn hò nhẹ nhàng</h2>
+                <p class="teaser">← chạm hoặc kéo góc tờ note nha</p>
+                <div class="details" id="d3" inert>
+                  <div class="inner">
+                    <p class="w" style="--i:0">Ăn no rồi đi cà phê, ngồi nhâm nhi và kể nhau nghe chuyện cả tuần. Chỗ nào đây ta:</p>
+                    <div class="choices" role="group" aria-label="Chọn quán cà phê">
+                      <button class="choice w" style="--i:1" type="button" data-group="cafe" data-opt="gain" aria-pressed="false">
+                        <svg class="box" viewBox="0 0 24 24" aria-hidden="true"><path class="s th" d="M4 5 Q11 3 19 4 Q20 11 19 19 Q11 20 4 19 Q3 11 4 5 Z"/><path class="tick" pathLength="1" d="M6 12 L10 17 L23 1"/></svg>
+                        <span class="c-txt"><span class="c-name">Gain.Hanoi</span></span>
+                        <svg class="loop" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M186 12 C150 -2 30 0 12 20 C-2 40 60 60 130 56 C186 52 202 30 172 8"/></svg>
+                      </button>
+                      <button class="choice w" style="--i:2" type="button" data-group="cafe" data-opt="rush" aria-pressed="false">
+                        <svg class="box" viewBox="0 0 24 24" aria-hidden="true"><path class="s th" d="M4 5 Q11 3 19 4 Q20 11 19 19 Q11 20 4 19 Q3 11 4 5 Z"/><path class="tick" pathLength="1" d="M6 12 L10 17 L23 1"/></svg>
+                        <span class="c-txt"><span class="c-name">Caffeine Rush</span></span>
+                        <svg class="loop" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M186 12 C150 -2 30 0 12 20 C-2 40 60 60 130 56 C186 52 202 30 172 8"/></svg>
+                      </button>
+                    </div>
+                    <p class="w picked" style="--i:3" data-picked="cafe" aria-live="polite">Chạm vào tên quán để chọn nha.</p>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <!-- ============ CHỐT LỊCH ============ -->
+          <section class="recap" aria-labelledby="recap-t">
+            <span class="pill" id="recap-t">chốt lịch</span>
+            <ul>
+              <li><span class="t">5h</span><span>đón em bé, chụp photobooth</span></li>
+              <li><span class="t">6h rưỡi</span><span>ăn tối ở <b class="sum empty" data-sum="an">em bé chọn nha</b></span></li>
+              <li><span class="t">8h</span><span>cà phê ở <b class="sum empty" data-sum="cafe">em bé chọn nha</b></span></li>
+            </ul>
+            <div class="send-row">
+              <button class="send" id="sendBtn" type="button" disabled>chốt lịch &amp; gửi thư ♡</button>
+              <span class="send-status" id="sendStatus" aria-live="polite">chọn đủ chỗ ăn và chỗ cà phê rồi chốt nha</span>
+            </div>
+            <div class="sign">
+              <svg viewBox="0 0 80 64" aria-hidden="true">
+                <g filter="url(#rough)">
+                  <path class="sf" d="M8 56 Q6 26 40 18 Q74 26 72 56 Q40 62 8 56 Z"/>
+                  <path class="s th" d="M31 22 Q40 8 49 22 M40 18 q-3 -6 2 -9"/>
+                  <circle class="k" cx="30" cy="40" r="2.2"/><circle class="k" cx="50" cy="40" r="2.2"/>
+                  <path class="s th" d="M36 45 q4 4 8 0"/>
+                  <ellipse class="kn" cx="22" cy="46" rx="4.5" ry="2.6" style="--note:var(--n1)"/><ellipse class="kn" cx="58" cy="46" rx="4.5" ry="2.6" style="--note:var(--n1)"/>
+                </g>
+              </svg>
+              <p>Hẹn em bé nha ♡</p>
+            </div>
+          </section>
+
+          <footer class="pager">
+            <button class="pill turn" type="button" data-go="1">← trang 1</button>
+            <span class="pg">2 / 2</span>
+          </footer>
+        </section>
+      </div>
+    </article>
+
+    <figure class="shot" id="shot" hidden>
+      <img id="shotImg" alt="Ảnh lịch hẹn đã chốt">
+      <figcaption id="shotCap">ảnh chốt lịch</figcaption>
+    </figure>
+    <div class="book-foot"><button class="refold" id="refold" type="button">↺ gấp thư lại</button></div>
+  </section>
+</main>
+
+<script>
+/* Link "Web app" của Google Apps Script gửi mail (kết thúc bằng /exec).
+   Để trống thì nút chốt lịch vẫn tạo ảnh nhưng chưa gửi mail. */
+var MAIL_URL = '';
+
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(s, r){ return (r || document).querySelector(s); }
+  function $$(s, r){ return [].slice.call((r || document).querySelectorAll(s)); }
+  function lsGet(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v){ try { localStorage.setItem(k, v); } catch (e) {} }
+  var notes = [];
+
+  /* ================= PHONG THƯ & LẬT TRANG ================= */
+  var envScene = $('#envScene'), bookScene = $('#bookScene'), book = $('#book');
+  var sheet1 = $('#sheet1'), sheet2 = $('#sheet2');
+
+  function goPage(n, instant){
+    book.classList.toggle('on-2', n === 2);
+    sheet1.inert = n !== 1; sheet2.inert = n !== 2;
+    sheet1.setAttribute('aria-hidden', n !== 1 ? 'true' : 'false');
+    sheet2.setAttribute('aria-hidden', n !== 2 ? 'true' : 'false');
+    if (n === 2){ notes.forEach(render); fitLabels(); }
+    if (!instant){
+      var top = bookScene.getBoundingClientRect().top + window.scrollY - 12;
+      if (window.scrollY > top) window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
+    }
+  }
+  $$('[data-go]').forEach(function(b){ b.addEventListener('click', function(){ goPage(+b.dataset.go); }); });
+
+  $('#envelope').addEventListener('click', function(){
+    if (envScene.classList.contains('is-opening')) return;
+    envScene.classList.add('is-opening');
+    setTimeout(function(){
+      envScene.hidden = true;
+      bookScene.hidden = false;
+      bookScene.classList.remove('arrive'); void bookScene.offsetWidth;
+      if (!reduce) bookScene.classList.add('arrive');
+      goPage(1, true);
+      window.scrollTo(0, 0);
+      notes.forEach(render);
+      fitLabels();
+    }, reduce ? 0 : 1700);
+  });
+  $('#refold').addEventListener('click', function(){
+    bookScene.hidden = true;
+    envScene.hidden = false;
+    envScene.classList.remove('is-opening');
+    window.scrollTo(0, 0);
+  });
+
+  /* ================= TỜ NOTE BÓC – DÁN ================= */
+  var REST = .08, REST_OPEN = .11, HOVER = .17, MAX = 1.8, DONE_AT = .7;
+  var SQ = [{x:0,y:0}, {x:1,y:0}, {x:1,y:1}, {x:0,y:1}];
+
+  // cắt đa giác theo nửa mặt phẳng f(p) >= 0
+  function clipPoly(poly, f){
+    var out = [];
+    for (var i = 0; i < poly.length; i++){
+      var a = poly[i], b = poly[(i + 1) % poly.length], fa = f(a), fb = f(b);
+      if (fa >= 0) out.push(a);
+      if ((fa >= 0) !== (fb >= 0)){
+        var t = fa / (fa - fb);
+        out.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+      }
+    }
+    return out;
+  }
+  function toPoly(pts){
+    return 'polygon(' + pts.map(function(p){ return (p.x * 100).toFixed(2) + '% ' + (p.y * 100).toFixed(2) + '%'; }).join(',') + ')';
+  }
+
+  // vẽ 1 tờ note theo trạng thái: (vx, vy) = góc giấy bị kéo đi bao xa (tính theo bề rộng tờ)
+  function render(st){
+    var b = st.btn, W = b.offsetWidth || 1, L = st.lift, P = st.pos;
+    b.style.transform =
+      'translate(' + (st.dx * P).toFixed(2) + 'px,' + (-3 * P - 16 * L).toFixed(2) + 'px) ' +
+      'rotate(' + (st.r + st.swing * (.5 * P + .5 * L)).toFixed(2) + 'deg) ' +
+      'rotateX(' + (14 * L).toFixed(2) + 'deg) ' +
+      'scale(' + (1 + .05 * L - .015 * st.press).toFixed(4) + ')';
+    b.style.filter =
+      'drop-shadow(0 ' + (1 + 2 * L).toFixed(1) + 'px ' + L.toFixed(1) + 'px var(--shade)) ' +
+      'drop-shadow(0 ' + (6 + 14 * L).toFixed(1) + 'px ' + (5 + 9 * L).toFixed(1) + 'px var(--shade))';
+
+    var len = Math.hypot(st.vx, st.vy);
+    if (len < .004){ st.paper.style.clipPath = 'none'; st.wrap.style.display = 'none'; return; }
+    st.wrap.style.display = 'block';
+    var n = { x: st.vx / len, y: st.vy / len };
+    var M = { x: st.C.x + st.vx / 2, y: st.C.y + st.vy / 2 };      // trung điểm → nếp gấp
+    var c = M.x * n.x + M.y * n.y;
+    st.paper.style.clipPath = toPoly(clipPoly(SQ, function(p){ return p.x * n.x + p.y * n.y - c; }));
+    st.flap.style.clipPath  = toPoly(clipPoly(SQ, function(p){ return c - (p.x * n.x + p.y * n.y); }));
+    // lật phần bị gập qua nếp gấp (phép đối xứng trục)
+    var m = [1 - 2 * n.x * n.x, -2 * n.x * n.y, -2 * n.x * n.y, 1 - 2 * n.y * n.y, 2 * c * W * n.x, 2 * c * W * n.y];
+    st.wrap.style.transform = 'matrix(' + m.map(function(v){ return v.toFixed(4); }).join(',') + ')';
+    // đổ bóng mặt sau: tối ở nếp gấp, sáng dần ra mép
+    var g = { x: -n.x, y: -n.y };
+    var ang = Math.atan2(g.x, -g.y) * 180 / Math.PI;
+    var Lg = W * (Math.abs(g.x) + Math.abs(g.y));
+    var sx = W / 2 - g.x * Lg / 2, sy = W / 2 - g.y * Lg / 2;
+    var fold = (M.x * W - sx) * g.x + (M.y * W - sy) * g.y;
+    var tip  = (st.C.x * W - sx) * g.x + (st.C.y * W - sy) * g.y;
+    st.flap.style.background = 'linear-gradient(' + ang.toFixed(1) + 'deg, var(--fa) ' + fold.toFixed(1) + 'px, var(--fb) ' +
+      (fold + (tip - fold) * .2).toFixed(1) + 'px, var(--fc) ' + tip.toFixed(1) + 'px)';
+  }
+
+  function ease(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function val(keys, t){
+    if (t <= keys[0][0]) return keys[0][1];
+    for (var i = 1; i < keys.length; i++){
+      if (t <= keys[i][0]){
+        var a = keys[i - 1], b = keys[i], s = (t - a[0]) / ((b[0] - a[0]) || 1);
+        return a[1] + (b[1] - a[1]) * ease(s);
+      }
+    }
+    return keys[keys.length - 1][1];
+  }
+  function play(st, tracks, dur, opts){
+    opts = opts || {};
+    cancelAnimationFrame(st.raf);
+    st.busy = !opts.soft;
+    var t0 = performance.now(), fired = false;
+    function frame(now){
+      var t = Math.min(1, (now - t0) / dur);
+      for (var k in tracks) st[k] = val(tracks[k], t);
+      render(st);
+      if (opts.fn && !fired && t >= opts.at){ fired = true; opts.fn(); }
+      if (t < 1) st.raf = requestAnimationFrame(frame); else st.busy = false;
+    }
+    st.raf = requestAnimationFrame(frame);
+  }
+  function aim(st, m){ return { x: st.u.x * m, y: st.u.y * m }; }
+  function settle(st, m, dur){
+    var a = aim(st, m);
+    play(st, { vx: [[0, st.vx], [1, a.x]], vy: [[0, st.vy], [1, a.y]] }, dur, { soft: true });
+  }
+  function setOpenUI(st, open){
+    st.open = open;
+    st.entry.classList.toggle('is-open', open);
+    st.btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    st.details.inert = !open;
+    if (open) document.body.classList.add('has-opened');
+  }
+
+  // bóc góc quá nửa tờ → nhấc lên → dán xuống chỗ mới (mở) hoặc chỗ cũ (đóng)
+  function toggle(st){
+    var opening = !st.open;
+    setOpenUI(st, opening);
+    var rest = aim(st, opening ? REST_OPEN : REST), to = opening ? 1 : 0;
+    if (reduce){ st.vx = rest.x; st.vy = rest.y; st.lift = 0; st.press = 0; st.pos = to; render(st); return; }
+    var big = aim(st, 1.5), mid = aim(st, .6);
+    play(st, {
+      vx:    [[0, st.vx], [.3, big.x], [.56, mid.x], [.8, 0], [1, rest.x]],
+      vy:    [[0, st.vy], [.3, big.y], [.56, mid.y], [.8, 0], [1, rest.y]],
+      lift:  [[0, st.lift], [.3, .12], [.56, 1], [.8, 0], [1, 0]],
+      pos:   [[0, st.pos], [.36, st.pos], [.76, to], [1, to]],
+      press: [[0, 0], [.78, 0], [.87, 1], [1, 0]]
+    }, 1400, opening ? { at: .8, fn: function(){ burst(st.btn.parentNode); } } : null);
+  }
+
+  var HEART = '<svg viewBox="0 0 20 20"><path d="M10 17 C2 12 3 4 10 7.5 C17 4 18 12 10 17 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+  function burst(wrap){
+    for (var i = 0; i < 5; i++){
+      var s = document.createElement('span');
+      s.className = 'pop';
+      s.innerHTML = HEART;
+      s.style.setProperty('--px', Math.round(Math.random() * 130 - 65) + 'px');
+      s.style.setProperty('--py', Math.round(-55 - Math.random() * 55) + 'px');
+      s.style.setProperty('--pr', Math.round(Math.random() * 70 - 35) + 'deg');
+      s.style.animationDelay = (i * 70) + 'ms';
+      s.addEventListener('animationend', function(){ this.remove(); });
+      wrap.appendChild(s);
+    }
+  }
+
+  notes = $$('.note').map(function(btn){
+    var entry = btn.closest('.entry'), flip = entry.classList.contains('flip');
+    return {
+      btn: btn, entry: entry, flip: flip,
+      details: document.getElementById(btn.getAttribute('aria-controls')),
+      paper: $('.paper', btn), wrap: $('.flap-wrap', btn), flap: $('.flap', btn),
+      r: parseFloat(entry.style.getPropertyValue('--r')) || 0,
+      C: flip ? { x: 0, y: 1 } : { x: 1, y: 1 },                 // góc dưới phía cột chữ
+      u: flip ? { x: .45, y: -.893 } : { x: -.45, y: -.893 },     // hướng bóc: lên trên, vào trong
+      dx: flip ? -12 : 12, swing: flip ? 5 : -5,
+      vx: 0, vy: 0, lift: 0, pos: 0, press: 0,
+      open: false, busy: false, raf: 0, drag: null, mute: false
+    };
+  });
+
+  notes.forEach(function(st){
+    var b = st.btn;
+    b.addEventListener('pointerdown', function(e){
+      if (st.busy || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (e.pointerType !== 'mouse' && !e.target.closest('.grab')) return;   // cảm ứng: kéo từ góc giấy
+      st.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, vx: st.vx, vy: st.vy, moved: false };
+      try { b.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    b.addEventListener('pointermove', function(e){
+      var d = st.drag; if (!d || e.pointerId !== d.id) return;
+      var W = b.offsetWidth || 1, mx = e.clientX - d.x, my = e.clientY - d.y;
+      if (!d.moved){ if (Math.hypot(mx, my) < 6) return; d.moved = true; cancelAnimationFrame(st.raf); st.busy = false; }
+      var vx = d.vx + mx / W, vy = d.vy + my / W;
+      if (vx * st.u.x + vy * st.u.y < REST){ var a = aim(st, REST); vx = a.x; vy = a.y; }
+      var len = Math.hypot(vx, vy);
+      if (len > MAX){ vx *= MAX / len; vy *= MAX / len; }
+      st.vx = vx; st.vy = vy; render(st);
+    });
+    function end(e){
+      var d = st.drag; if (!d || e.pointerId !== d.id) return;
+      st.drag = null;
+      if (!d.moved) return;
+      st.mute = true; setTimeout(function(){ st.mute = false; }, 60);
+      if (Math.hypot(st.vx, st.vy) >= DONE_AT) toggle(st);
+      else settle(st, st.open ? REST_OPEN : REST, 380);
+    }
+    b.addEventListener('pointerup', end);
+    b.addEventListener('pointercancel', end);
+    b.addEventListener('click', function(){ if (st.mute || st.busy) return; toggle(st); });
+    b.addEventListener('pointerenter', function(e){ if (e.pointerType === 'mouse' && !st.busy && !st.drag && !reduce) settle(st, HOVER, 260); });
+    b.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse' && !st.busy && !st.drag && !reduce) settle(st, st.open ? REST_OPEN : REST, 300); });
+    var a = aim(st, REST); st.vx = a.x; st.vy = a.y; render(st);
+  });
+  window.addEventListener('resize', function(){ notes.forEach(render); });
+
+  /* ================= CHỌN QUÁN ================= */
+  var NAMES = {
+    an:   { fungha:'Fungha Dimsum', haruki:'Ramen Haruki' },
+    cafe: { gain:'Gain.Hanoi',      rush:'Caffeine Rush' }
+  };
+  var KEY = 'hen-ho-ne-picks-v1', SENT_KEY = 'hen-ho-ne-sent-v1';
+  var picks = { an:null, cafe:null };
+  try { var saved = JSON.parse(lsGet(KEY) || '{}'); if (saved && typeof saved === 'object') { picks.an = NAMES.an[saved.an] ? saved.an : null; picks.cafe = NAMES.cafe[saved.cafe] ? saved.cafe : null; } } catch (e) {}
+
+  function renderPick(group){
+    var cur = picks[group];
+    $$('.choice[data-group="' + group + '"]').forEach(function(c){
+      var on = c.dataset.opt === cur;
+      c.classList.toggle('is-picked', on);
+      c.classList.toggle('is-other', !!cur && !on);
+      c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    $$('.mark[data-group="' + group + '"]').forEach(function(m){ m.classList.toggle('is-on', m.dataset.opt === cur); });
+    var line = $('[data-picked="' + group + '"]'), sum = $('[data-sum="' + group + '"]');
+    if (cur){
+      line.innerHTML = 'Chốt: <b>' + NAMES[group][cur] + '</b> ♡ <span>(đổi ý thì chạm chỗ kia)</span>';
+      sum.textContent = NAMES[group][cur];
+      sum.classList.remove('empty'); sum.classList.add('done');
+    } else {
+      line.textContent = 'Chạm vào tên quán để chọn nha.';
+      sum.textContent = 'em bé chọn nha';
+      sum.classList.add('empty'); sum.classList.remove('done');
+    }
+    updateSend();
+  }
+  $$('.choice').forEach(function(c){
+    c.addEventListener('click', function(){
+      picks[c.dataset.group] = c.dataset.opt;
+      renderPick(c.dataset.group);
+      lsSet(KEY, JSON.stringify(picks));
+    });
+  });
+
+  /* ================= CHỐT LỊCH: VẼ ẢNH + GỬI MAIL ================= */
+  var sendBtn = $('#sendBtn'), sendStatus = $('#sendStatus'), sending = false;
+  function sig(){ return picks.an + '|' + picks.cafe; }
+  function say(t){ sendStatus.textContent = t; }
+  function updateSend(){
+    if (sending) return;
+    var ready = !!(picks.an && picks.cafe), sent = lsGet(SENT_KEY);
+    if (!ready){
+      sendBtn.disabled = true; sendBtn.textContent = 'chốt lịch & gửi thư ♡';
+      say('chọn đủ chỗ ăn và chỗ cà phê rồi chốt nha');
+    } else if (sent === sig()){
+      sendBtn.disabled = true; sendBtn.textContent = 'đã chốt ♡';
+      say('lịch này đã gửi về mail của hai đứa rồi nha');
+    } else {
+      sendBtn.disabled = false; sendBtn.textContent = sent ? 'gửi lại lịch mới ♡' : 'chốt lịch & gửi thư ♡';
+      say('bấm để chốt, ảnh lịch hẹn sẽ gửi về mail cả hai');
+    }
+  }
+
+  var C = { paper:'#FCF9F1', line:'#E5DDCC', ink:'#1E1B17', soft:'#6F6656', bright:'#FFFDF5', n1:'#FFC845', n2:'#FFE35A', tape:'#C9A57E' };
+  var HAND = '"Patrick Hand","Segoe Print","Comic Sans MS",cursive';
+  var MARK = '"Pangolin","Patrick Hand","Comic Sans MS",cursive';
+
+  function stamp(){
+    var d = new Date(), p = function(n){ return (n < 10 ? '0' : '') + n; };
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ', ' + p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+  function blobRound(x, X, Y, w, h, r){
+    x.beginPath();
+    x.moveTo(X + r, Y); x.lineTo(X + w - r, Y); x.quadraticCurveTo(X + w, Y, X + w, Y + r);
+    x.lineTo(X + w, Y + h - r); x.quadraticCurveTo(X + w, Y + h, X + w - r, Y + h);
+    x.lineTo(X + r, Y + h); x.quadraticCurveTo(X, Y + h, X, Y + h - r);
+    x.lineTo(X, Y + r); x.quadraticCurveTo(X, Y, X + r, Y);
+    x.closePath();
+  }
+  function spacing(x, v){ if ('letterSpacing' in x) x.letterSpacing = v; }
+
+  // hình Tũn vẽ tay → ảnh để đặt vào thiệp
+  function portraitImage(){
+    return new Promise(function(resolve){
+      try {
+        var NS = 'http://www.w3.org/2000/svg', src = $('#portraitSvg'), cl = src.cloneNode(true);
+        cl.setAttribute('xmlns', NS); cl.setAttribute('width', '480'); cl.setAttribute('height', '600');
+        var st = document.createElementNS(NS, 'style');
+        st.textContent =
+          '.s{fill:none;stroke:' + C.ink + ';stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}' +
+          '.sf{fill:' + C.bright + ';stroke:' + C.ink + ';stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}' +
+          '.sb{fill:none;stroke:' + C.bright + ';stroke-width:2;stroke-linecap:round;stroke-linejoin:round}' +
+          '.th{stroke-width:1.7}.k{fill:' + C.ink + '}.kb{fill:' + C.bright + '}' +
+          '.yolk{fill:' + C.n1 + ';stroke:' + C.ink + ';stroke-width:1.4}';
+        cl.insertBefore(st, cl.firstChild);
+        $('defs', cl).appendChild($('#rough').cloneNode(true));
+        var img = new Image();
+        img.onload = function(){ resolve(img); };
+        img.onerror = function(){ resolve(null); };
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(cl));
+      } catch (e) { resolve(null); }
+    });
+  }
+
+  // vẽ thiệp "chốt lịch" 1080×1350 theo kiểu trang giấy kẻ dòng
+  function drawCard(face, when){
+    var W = 1080, H = 1350, R = 60;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    x.fillStyle = C.paper; x.fillRect(0, 0, W, H);
+    x.fillStyle = C.line; for (var y = R * 2; y < H; y += R) x.fillRect(0, y, W, 2);
+    var gb = x.createLinearGradient(0, 0, 44, 0);
+    gb.addColorStop(0, 'rgba(70,52,25,.13)'); gb.addColorStop(1, 'rgba(70,52,25,0)');
+    x.fillStyle = gb; x.fillRect(0, 0, 44, H);
+    x.textBaseline = 'alphabetic';
+
+    // tiêu đề
+    x.fillStyle = C.ink; x.font = '56px ' + HAND; spacing(x, '5px');
+    x.fillText('HẸN HÒ NHƯ PHỚT ĐẾT', 80, 170, 600);         // không lấn sang tờ note bên phải
+    spacing(x, '0px');
+    x.fillStyle = C.soft; x.fillRect(80, 179, 600, 3);
+    x.font = '32px ' + HAND;
+    x.fillText('From: Vân Đình  ·  To: Phobokimchi aka Tũn', 80, 230, 600);
+
+    // nhãn "chốt lịch"
+    x.font = '30px ' + MARK; spacing(x, '4px');
+    var pw = x.measureText('CHỐT LỊCH').width + 56;
+    x.save(); x.translate(80, 314); x.rotate(-.025);
+    x.fillStyle = C.ink; blobRound(x, 0, 0, pw, 52, 26); x.fill();
+    x.fillStyle = C.paper; x.fillText('CHỐT LỊCH', 28, 37);
+    x.restore(); spacing(x, '0px');
+
+    // tờ note có hình Tũn
+    x.save(); x.translate(875, 285); x.rotate(.045);
+    x.shadowColor = 'rgba(55,40,15,.28)'; x.shadowBlur = 22; x.shadowOffsetY = 12;
+    x.fillStyle = C.n1; blobRound(x, -145, -180, 290, 360, 16); x.fill();
+    x.shadowColor = 'transparent';
+    if (face) x.drawImage(face, -138, -172, 276, 345);
+    x.globalAlpha = .9; x.fillStyle = C.tape; x.fillRect(-60, -196, 120, 32); x.globalAlpha = 1;
+    x.restore();
+    x.fillStyle = C.soft; x.font = '30px ' + HAND; x.textAlign = 'center';
+    x.fillText('↑ Tũn nè ♡', 875, 530); x.textAlign = 'left';
+
+    // 3 chặng, mỗi chặng nằm trên 1 dòng kẻ
+    var rows = [
+      ['5h chiều', 'Đón em bé, chụp photobooth', ''],
+      ['6h rưỡi – 7h', 'Ăn tối ở ', NAMES.an[picks.an]],
+      ['8h – 8h rưỡi', 'Cà phê ở ', NAMES.cafe[picks.cafe]]
+    ];
+    rows.forEach(function(r, i){
+      var base = 650 + i * 120;
+      x.fillStyle = C.ink; x.font = '34px ' + MARK; x.fillText(r[0], 80, base);
+      x.font = '46px ' + HAND;
+      x.fillText(r[1], 330, base);
+      if (r[2]){
+        var lx = 330 + x.measureText(r[1]).width, lw = x.measureText(r[2]).width;
+        x.fillStyle = C.n2; x.fillRect(lx - 4, base - 20, lw + 8, 22);
+        x.fillStyle = C.ink; x.fillText(r[2], lx, base);
+      }
+    });
+
+    // gạch đứt + giờ chốt + lời hẹn
+    x.strokeStyle = C.soft; x.lineWidth = 3; x.setLineDash([14, 10]);
+    x.beginPath(); x.moveTo(80, 1020); x.lineTo(1000, 1020); x.stroke(); x.setLineDash([]);
+    x.fillStyle = C.soft; x.font = '34px ' + HAND;
+    x.fillText('Tũn chốt lúc ' + when, 80, 1130);
+    x.save(); x.translate(1000, 1250); x.rotate(-.05);
+    x.fillStyle = C.ink; x.font = '54px ' + HAND; x.textAlign = 'right';
+    x.fillText('Hẹn em bé nha ♡', 0, 0); x.restore();
+    x.fillStyle = C.ink; x.font = '38px ' + HAND; x.textAlign = 'right';
+    x.fillText('— Vinh', 1000, 1310); x.textAlign = 'left';
+    return cv;
+  }
+
+  function cardDataUrl(when){
+    var ready = document.fonts && document.fonts.load
+      ? Promise.all([
+          document.fonts.load('46px "Patrick Hand"', 'Hẹn hò như phớt đết Ữ'),
+          document.fonts.load('34px "Pangolin"', 'CHỐT LỊCH rưỡi')
+        ]).catch(function(){})
+      : Promise.resolve();
+    return ready.then(portraitImage).then(function(face){
+      try { return drawCard(face, when).toDataURL('image/jpeg', .9); }
+      catch (e) { return drawCard(null, when).toDataURL('image/jpeg', .9); }   // phòng khi trình duyệt chặn ảnh SVG
+    });
+  }
+
+  sendBtn.addEventListener('click', function(){
+    if (sending || !(picks.an && picks.cafe)) return;
+    sending = true; sendBtn.disabled = true;
+    var mySig = sig(), when = stamp();
+    say('đang chụp lại lịch…');
+    cardDataUrl(when).then(function(url){
+      $('#shotImg').src = url; $('#shot').hidden = false;
+      if (!MAIL_URL){
+        $('#shotCap').textContent = 'ảnh chốt lịch (phần gửi mail chưa được nối)';
+        throw new Error('no_mail_url');
+      }
+      say('đang gửi thư…');
+      return fetch(MAIL_URL, {
+        method: 'POST',
+        body: JSON.stringify({ image: url.split(',')[1], an: NAMES.an[picks.an], cafe: NAMES.cafe[picks.cafe], at: when })
+      }).then(function(res){ return res.json(); }).then(function(j){
+        if (!j || !j.ok) throw new Error((j && j.error) || 'send_failed');
+        lsSet(SENT_KEY, mySig);
+        $('#shotCap').textContent = 'ảnh chốt lịch đã gửi về mail của hai đứa ♡';
+      });
+    }).then(function(){
+      sending = false; updateSend();
+      say('đã gửi về mail của hai đứa rồi nha ♡');
+    }).catch(function(err){
+      sending = false; sendBtn.disabled = false;
+      var m = err && err.message;
+      say(m === 'no_mail_url' ? 'đã chụp xong ảnh, nhưng phần gửi mail chưa được nối'
+        : m === 'rate_limited' ? 'gửi nhiều quá rồi, đợi một lúc rồi thử lại nha'
+        : 'chưa gửi được, kiểm tra mạng rồi bấm lại nha');
+    });
+  });
+
+  renderPick('an'); renderPick('cafe');
+
+  // Giữ chữ trên tờ note không tràn mép, kể cả khi font viết tay chưa tải kịp
+  function fitLabels(){
+    $$('.note text.lbl').forEach(function(t){
+      t.removeAttribute('textLength'); t.removeAttribute('lengthAdjust');
+      var room = 194 - (parseFloat(t.getAttribute('x')) || 0);
+      try {
+        var w = t.getComputedTextLength();
+        if (w > room){ t.setAttribute('textLength', room); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+      } catch (e) {}
+    });
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if (!bookScene.hidden) fitLabels(); });
+})();
+</script>
+</body>
+</html>
